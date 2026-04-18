@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>GREEN-API | Тестирование методов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4fa 0%, #e9eef4 100%);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+        }
+
+        /* главный контейнер – имитация макета (карточка, тень, скругления) */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* шапка */
+        .header {
+            background: #0f2b3d;
+            padding: 1.5rem 2rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-weight: 600;
+            font-size: 1.7rem;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1::before {
+            content: "💬";
+            font-size: 1.9rem;
+            font-weight: normal;
+        }
+
+        .sub {
+            color: #b3d4f0;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* параметры подключения */
+        .creds-panel {
+            padding: 1.8rem 2rem 1.2rem 2rem;
+            background: #f9fbfd;
+            border-bottom: 1px solid #e2edf2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2c6e9e;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid #cfdfe8;
+            background: white;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            font-family: monospace;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #25a55b;
+            box-shadow: 0 0 0 3px rgba(37, 165, 91, 0.2);
+        }
+
+        /* основной контент: две колонки (методы слева / вывод справа) */
+        .main-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .methods-area {
+            flex: 2;
+            min-width: 280px;
+        }
+
+        .output-area {
+            flex: 1.5;
+            min-width: 320px;
+        }
+
+        /* карточки методов */
+        .method-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            border: 1px solid #e5f0f5;
+            margin-bottom: 1.8rem;
+            padding: 1.3rem 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .method-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a4c6e;
+            margin-bottom: 1rem;
+            border-left: 4px solid #25a55b;
+            padding-left: 12px;
+        }
+
+        .row-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .btn {
+            background: #f0f4f9;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f5a7e;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #25a55b;
+            color: white;
+            box-shadow: 0 2px 5px rgba(37, 165, 91, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #1e8c4c;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            border: 1px solid #bdd9e8;
+            background: white;
+        }
+
+        .btn-outline:hover {
+            background: #eef5fa;
+            border-color: #25a55b;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .field-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 14px;
+            align-items: center;
+        }
+
+        .field-row input, .field-row .flex-input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid #d0e2ec;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .flex-input {
+            min-width: 160px;
+        }
+
+        .small-hint {
+            font-size: 0.7rem;
+            color: #6c8ea0;
+            margin-top: 6px;
+        }
+
+        /* область вывода ответа */
+        .output-card {
+            background: #fefefe;
+            border-radius: 1.5rem;
+            border: 1px solid #e2edf2;
+            padding: 1.3rem 1.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        .output-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f5a7e;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .response-box {
+            background: #0d2c3b;
+            color: #e3f0f7;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            min-height: 380px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto;
+            resize: vertical;
+            border: none;
+            line-height: 1.45;
+        }
+
+        .response-box:focus {
+            outline: none;
+        }
+
+        .clear-btn {
+            align-self: flex-end;
+            margin-top: 12px;
+            background: none;
+            border: none;
+            color: #6f9fbb;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .clear-btn:hover {
+            color: #c23d3d;
+            text-decoration: underline;
+        }
+
+        hr {
+            margin: 0.5rem 0;
+            border-color: #e2edf2;
+        }
+
+        footer {
+            padding: 1rem 2rem 1.8rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #7d9bb0;
+            border-top: 1px solid #e9f0f4;
+        }
+
+        @media (max-width: 780px) {
+            body {
+                padding: 1rem;
+            }
+            .main-grid {
+                flex-direction: column;
+            }
+            .creds-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .badge {
+            background: #eef2f5;
+            border-radius: 40px;
+            padding: 3px 10px;
+            font-size: 0.7rem;
+            color: #2c6e9e;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="header">
+        <h1>GREEN-API · Тестовый стенд</h1>
+        <div class="sub">Управление инстансом WhatsApp: настройки, состояние, отправка сообщений и файлов</div>
+    </div>
+
+    <div class="creds-panel">
+        <div class="input-group">
+            <label>📇 idInstance</label>
+            <input type="text" id="idInstance" placeholder="Например: 1101234567" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>🔑 ApiTokenInstance</label>
+            <input type="text" id="apiToken" placeholder="Токен из личного кабинета GREEN-API" autocomplete="off">
+        </div>
+        <div class="badge" style="margin-bottom: 6px;">⚡ после ввода параметров используйте методы</div>
+    </div>
+
+    <div class="main-grid">
+        <!-- Левая область: все методы -->
+        <div class="methods-area">
+            <!-- Блок getSettings + getStateInstance -->
+            <div class="method-card">
+                <h3>🔍 Статус и настройки</h3>
+                <div class="row-buttons">
+                    <button class="btn btn-primary" id="getSettingsBtn">📟 getSettings</button>
+                    <button class="btn btn-primary" id="getStateBtn">📊 getStateInstance</button>
+                </div>
+                <div class="small-hint">Проверяет конфигурацию инстанса и состояние авторизации (authorized / notAuthorized).</div>
+            </div>
+
+            <!-- Блок sendMessage -->
+            <div class="method-card">
+                <h3>✉️ sendMessage</h3>
+                <div class="field-row">
+                    <input type="tel" id="phoneNumber" class="flex-input" placeholder="Номер телефона (79001234567)">
+                    <input type="text" id="messageText" class="flex-input" placeholder="Текст сообщения">
+                </div>
+                <div class="field-row">
+                    <button class="btn btn-primary" id="sendMsgBtn">📨 Отправить сообщение</button>
+                </div>
+                <div class="small-hint">✔️ Формат номера: 7XXXXXXXXXX (без + и пробелов). Автоматически добавится @c.us</div>
+            </div>
+
+            <!-- Блок sendFileByUrl -->
+            <div class="method-card">
+                <h3>📎 sendFileByUrl</h3>
+                <div class="field-row">
+                    <input type="tel" id="filePhoneNumber" class="flex-input" placeholder="Номер получателя (79001234567)">
+                    <input type="url" id="fileUrl" class="flex-input" placeholder="URL файла (https://... .jpg/.pdf)">
+                </div>
+                <div class="field-row">
+                    <input type="text" id="fileName" class="flex-input" placeholder="Имя файла (опционально)">
+                    <button class="btn btn-primary" id="sendFileBtn">📤 Отправить файл по URL</button>
+                </div>
+                <div class="small-hint">📌 GREEN-API скачает файл по ссылке и отправит получателю. Рекомендуется публичный URL.</div>
+            </div>
+        </div>
+
+        <!-- Правая область: вывод ответов (только чтение) -->
+        <div class="output-area">
+            <div class="output-card">
+                <h3>📋 Ответ методов API</h3>
+                <textarea id="responseArea" class="response-box" readonly wrap="off" placeholder="Здесь будет отображаться результат вызова методов GET / POST ..."></textarea>
+                <button id="clearResponseBtn" class="clear-btn">🗑 Очистить вывод</button>
+            </div>
+        </div>
+    </div>
+    <footer>
+        GREEN-API demo | методы: getSettings, getStateInstance, sendMessage, sendFileByUrl
+    </footer>
+</div>
+
+<script>
+    // ======================== DOM элементы ========================
+    const idInstanceInput = document.getElementById('idInstance');
+    const apiTokenInput = document.getElementById('apiToken');
+    const responseArea = document.getElementById('responseArea');
+    const clearBtn = document.getElementById('clearResponseBtn');
+
+    // Кнопки методов
+    const getSettingsBtn = document.getElementById('getSettingsBtn');
+    const getStateBtn = document.getElementById('getStateBtn');
+    const sendMsgBtn = document.getElementById('sendMsgBtn');
+    const sendFileBtn = document.getElementById('sendFileBtn');
+
+    // Поля для sendMessage
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const messageTextInput = document.getElementById('messageText');
+
+    // Поля для sendFileByUrl
+    const filePhoneInput = document.getElementById('filePhoneNumber');
+    const fileUrlInput = document.getElementById('fileUrl');
+    const fileNameInput = document.getElementById('fileName');
+
+    // ======================== вспомогательные функции ========================
+    // отображение результата в текстовое поле (только чтение)
+    function setResponse(text) {
+        responseArea.value = text;
+    }
+
+    // добавить сообщение об ошибке с форматированием
+    function showError(methodName, errorDetail) {
+        const timestamp = new Date().toLocaleTimeString();
+        const errorText = `[${timestamp}] ❌ Ошибка в методе: ${methodName}\n${errorDetail}\n───────────────────────────────`;
+        setResponse(errorText);
+    }
+
+    function showSuccess(methodName, data, isJson = true) {
+        const timestamp = new Date().toLocaleTimeString();
+        let prettyData = '';
+        if (isJson && (typeof data === 'object')) {
+            prettyData = JSON.stringify(data, null, 2);
+        } else {
+            prettyData = String(data);
+        }
+        const output = `[${timestamp}] ✅ Ответ ${methodName}:\n${prettyData}\n───────────────────────────────`;
+        setResponse(output);
+    }
+
+    // Универсальный запрос к GREEN-API
+    async function greenApiRequest(methodName, endpoint, httpMethod, body = null) {
+        const idInstance = idInstanceInput.value.trim();
+        const apiToken = apiTokenInput.value.trim();
+
+        if (!idInstance || !apiToken) {
+            showError(methodName, 'Не заполнены idInstance или ApiTokenInstance. Укажите параметры подключения.');
+            return null;
+        }
+
+        // базовый URL
+        const baseUrl = `https://api.green-api.com/waInstance${idInstance}/${endpoint}/${apiToken}`;
+        const options = {
+            method: httpMethod,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        if (body && (httpMethod === 'POST' || httpMethod === 'PUT')) {
+            options.body = JSON.stringify(body);
+        }
+
+        // индикация: disable кнопок на время запроса (простейшая блокировка через стиль, но для удобства)
+        // просто покажем в поле статус загрузки
+        setResponse(`⏳ Отправка запроса ${methodName}... ожидайте ответа сервера.`);
+
+        try {
+            const response = await fetch(baseUrl, options);
+            let responseData;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                responseData = await response.json();
+            } else {
+                const text = await response.text();
+                responseData = { error: text, status: response.status };
+            }
+
+            if (!response.ok) {
+                // сервер вернул ошибку HTTP
+                const errorMsg = responseData?.message || responseData?.error || JSON.stringify(responseData);
+                throw new Error(`HTTP ${response.status}: ${errorMsg}`);
+            }
+
+            // успешный ответ
+            showSuccess(methodName, responseData, true);
+            return responseData;
+        } catch (err) {
+            console.error(err);
+            let errorDetail = err.message;
+            if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+                errorDetail = 'Ошибка сети: не удалось соединиться с API. Проверьте интернет или CORS (обычно проблем нет).';
+            }
+            showError(methodName, errorDetail);
+            return null;
+        }
+    }
+
+    // ======================== Обработчики методов ========================
+    // 1. getSettings
+    async function handleGetSettings() {
+        await greenApiRequest('getSettings', 'getSettings', 'GET');
+    }
+
+    // 2. getStateInstance
+    async function handleGetStateInstance() {
+        await greenApiRequest('getStateInstance', 'getStateInstance', 'GET');
+    }
+
+    // 3. sendMessage
+    async function handleSendMessage() {
+        let phone = phoneNumberInput.value.trim();
+        const message = messageTextInput.value.trim();
+
+        if (!phone) {
+            showError('sendMessage', 'Укажите номер телефона получателя.');
+            return;
+        }
+        if (!message) {
+            showError('sendMessage', 'Введите текст сообщения.');
+            return;
+        }
+
+        // очистка номера: оставляем только цифры
+        phone = phone.replace(/\D/g, '');
+        if (!phone) {
+            showError('sendMessage', 'Некорректный номер телефона. Используйте только цифры (например, 79001234567).');
+            return;
+        }
+        // формируем chatId в формате 79001234567@c.us
+        const chatId = `${phone}@c.us`;
+        const payload = {
+            chatId: chatId,
+            message: message
+        };
+        await greenApiRequest('sendMessage', 'sendMessage', 'POST', payload);
+    }
+
+    // 4. sendFileByUrl
+    async function handleSendFileByUrl() {
+        let phone = filePhoneInput.value.trim();
+        const fileUrl = fileUrlInput.value.trim();
+        let fileName = fileNameInput.value.trim();
+
+        if (!phone) {
+            showError('sendFileByUrl', 'Укажите номер телефона получателя.');
+            return;
+        }
+        if (!fileUrl) {
+            showError('sendFileByUrl', 'Введите URL файла (ссылка на изображение, документ и т.д.).');
+            return;
+        }
+        // валидация URL
+        try {
+            new URL(fileUrl);
+        } catch (e) {
+            showError('sendFileByUrl', `Некорректный URL: "${fileUrl}". Проверьте ссылку.`);
+            return;
+        }
+
+        phone = phone.replace(/\D/g, '');
+        if (!phone) {
+            showError('sendFileByUrl', 'Некорректный номер телефона (только цифры).');
+            return;
+        }
+
+        const chatId = `${phone}@c.us`;
+        const payload = {
+            chatId: chatId,
+            urlFile: fileUrl
+        };
+        // если имя файла передано, добавляем
+        if (fileName) {
+            payload.fileName = fileName;
+        }
+
+        await greenApiRequest('sendFileByUrl', 'sendFileByUrl', 'POST', payload);
+    }
+
+    // ======================== вспомогательные ui: очистка поля вывода ========================
+    clearBtn.addEventListener('click', () => {
+        responseArea.value = '';
+        responseArea.placeholder = 'Вывод очищен. Нажмите любую кнопку метода...';
+    });
+
+    // ======================== назначение событий ========================
+    getSettingsBtn.addEventListener('click', handleGetSettings);
+    getStateBtn.addEventListener('click', handleGetStateInstance);
+    sendMsgBtn.addEventListener('click', handleSendMessage);
+    sendFileBtn.addEventListener('click', handleSendFileByUrl);
+
+    // Небольшой хелпер для демонстрации (если пользователь хочет быстро заполнить тестовые данные, но не обязательно)
+    // Автоматически не подставляем, чтобы не мешать. Однако добавим подсказку в консоль.
+    console.log('GREEN-API тестовая страница готова. Укажите idInstance и ApiTokenInstance из личного кабинета.');
+</script>
+</body>
+</html>
